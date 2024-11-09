@@ -84,7 +84,7 @@ class ImageProcessor:
         if file.content_type not in Config.ALLOWED_MIME_TYPES:
             raise HTTPException(
                 status_code=status.HTTP_415_UNSUPPORTED_MEDIA_TYPE,
-                detail=f"Unsupported file type. Allowed types: {', '.join(Config.ALLOWED_MIME_TYPES)}"
+                detail=f"Unsupported media type. Allowed types: {', '.join(Config.ALLOWED_MIME_TYPES)}"
             )
 
     @staticmethod
