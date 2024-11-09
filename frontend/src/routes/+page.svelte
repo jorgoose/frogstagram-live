@@ -127,8 +127,10 @@
                 </button>
 
                 <button class="flex w-full items-center px-6 py-3 text-2xl text-gray-700 hover:bg-green-50 dark:text-gray-200 dark:hover:bg-green-900/20">
-                    <Fa icon={faSquarePlus} class="mr-4 h-7 w-7" />
-                    <span class="text-sm font-medium">Create</span>
+                    <a href="/upload" class="flex items-center">
+                        <Fa icon={faSquarePlus} class="mr-4 h-7 w-7" />
+                        <span class="text-sm font-medium">Create</span>
+                    </a>
                 </button>
             </div>
         </div>
@@ -177,9 +179,9 @@
     <div class="fixed left-0 right-0 top-0 z-10 flex h-16 items-center justify-between border-b border-gray-200 bg-white px-4 md:hidden dark:border-gray-800 dark:bg-gray-900">
         <h1 class="text-xl font-bold text-gray-900 dark:text-white">🐸 Frogstagram</h1>
         <div class="flex items-center space-x-4">
-            <button class="rounded-md p-2 text-2xl text-gray-700 hover:bg-green-50 dark:text-gray-200 dark:hover:bg-green-900/20">
+            <a href="/upload" class="rounded-md p-2 text-2xl text-gray-700 hover:bg-green-50 dark:text-gray-200 dark:hover:bg-green-900/20">
                 <Fa icon={faSquarePlus} class="h-7 w-7" />
-            </button>
+            </a>
             <button class="rounded-md p-2 text-2xl text-green-600 hover:bg-green-50 dark:text-green-400 dark:hover:bg-green-900/20">
                 <Fa icon={faFrog} class="h-6 w-6" />
             </button>
