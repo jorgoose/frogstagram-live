@@ -34,7 +34,7 @@
 				avatar: 'https://picsum.photos/seed/user1/40/40'
 			},
 			image: 'https://picsum.photos/seed/frog1/600/600',
-			likes: 256,
+			ribbits: 256,
 			caption: "Just chillin' on a lily pad 🐸",
 			comments: 42
 		},
@@ -45,7 +45,7 @@
 				avatar: 'https://picsum.photos/seed/user2/40/40'
 			},
 			image: 'https://picsum.photos/seed/frog2/600/600',
-			likes: 189,
+			ribbits: 189,
 			caption: 'Hopped into a new adventure today! 🌿',
 			comments: 23
 		},
@@ -56,7 +56,7 @@
 				avatar: 'https://picsum.photos/seed/user3/40/40'
 			},
 			image: 'https://picsum.photos/seed/frog3/600/600',
-			likes: 312,
+			ribbits: 312,
 			caption: 'Caught a fly mid-air! #NinjaFrog',
 			comments: 56
 		}
@@ -86,32 +86,39 @@
 			</div>
 
 			<div class="mt-2 space-y-1">
-				<h2 class="mb-2 px-4 text-xs font-semibold uppercase tracking-wider text-gray-500">
-					Main Menu
-				</h2>
-
-				<!-- Main Navigation -->
-				<button
-					class="text-2xl flex w-full items-center px-4 py-2 text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800"
-				>
-					<Fa icon={faHome} class="mr-4 h-6 w-6" />
-					<span class="text-sm font-medium">Home</span>
-				</button>
-
-				<button
-					class="text-2xl flex w-full items-center px-4 py-2 text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800"
-				>
-					<Fa icon={faCompass} class="mr-4 h-6 w-6" />
-					<span class="text-sm font-medium">Explore</span>
-				</button>
-
-				<button
-					class="text-2xl flex w-full items-center px-4 py-2 text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800"
-				>
-					<Fa icon={faSquarePlus} class="mr-4 h-6 w-6" />
-					<span class="text-sm font-medium">Create</span>
-				</button>
-			</div>
+                <h2 class="mb-2 px-6 text-xs font-semibold uppercase tracking-wider text-gray-500">
+                  Main Menu
+                </h2>
+              
+                <!-- Main Navigation -->
+                <button
+                  class="text-2xl flex w-full items-center px-6 py-3 text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800"
+                >
+                  <Fa icon={faHome} class="mr-4 h-6 w-6" />
+                  <span class="text-sm font-medium">Home</span>
+                </button>
+              
+                <button
+                  class="text-2xl flex w-full items-center px-6 py-3 text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800"
+                >
+                  <Fa icon={faCompass} class="mr-4 h-6 w-6" />
+                  <span class="text-sm font-medium">Explore</span>
+                </button>
+              
+                <button
+                  class="text-2xl flex w-full items-center px-6 py-3 text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800"
+                >
+                  <Fa icon={faFrog} class="mr-4 h-6 w-6" />
+                  <span class="text-sm font-medium">Notifications</span>
+                </button>
+              
+                <button
+                  class="text-2xl flex w-full items-center px-6 py-3 text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800"
+                >
+                  <Fa icon={faSquarePlus} class="mr-4 h-7 w-7" />
+                  <span class="text-sm font-medium">Create</span>
+                </button>
+              </div>
 		</div>
 
 		<!-- Bottom Section with Profile and More -->
@@ -246,7 +253,7 @@
 									<Fa icon={faComment} class="h-6 w-6" />
 								</button>
 								<span class="ml-auto text-sm text-gray-500 dark:text-gray-400"
-									>{post.likes} likes</span
+									>{post.ribbits} ribbits</span
 								>
 							</div>
 							<p class="text-sm text-gray-900 dark:text-white">
