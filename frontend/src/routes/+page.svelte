@@ -1,17 +1,22 @@
 <script>
+	// Import regular icons as default
 	import {
-		faHome,
 		faUser,
 		faHeart,
 		faComment,
-		faFrog,
 		faSquarePlus,
-		faMagnifyingGlass,
 		faCompass,
+		faMoon
+	} from '@fortawesome/free-regular-svg-icons';
+
+	import {
+		faHome,
+		faMagnifyingGlass,
 		faBars,
-		faMoon,
-		faRightFromBracket
+		faRightFromBracket,
+		faFrog
 	} from '@fortawesome/free-solid-svg-icons';
+
 	import Fa from 'svelte-fa';
 	import { writable } from 'svelte/store';
 
@@ -87,31 +92,24 @@
 
 				<!-- Main Navigation -->
 				<button
-					class="flex w-full items-center px-4 py-2 text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800"
+					class="text-2xl flex w-full items-center px-4 py-2 text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800"
 				>
 					<Fa icon={faHome} class="mr-4 h-6 w-6" />
 					<span class="text-sm font-medium">Home</span>
 				</button>
 
 				<button
-					class="flex w-full items-center px-4 py-2 text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800"
+					class="text-2xl flex w-full items-center px-4 py-2 text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800"
 				>
 					<Fa icon={faCompass} class="mr-4 h-6 w-6" />
 					<span class="text-sm font-medium">Explore</span>
 				</button>
 
 				<button
-					class="flex w-full items-center px-4 py-2 text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800"
+					class="text-2xl flex w-full items-center px-4 py-2 text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800"
 				>
 					<Fa icon={faSquarePlus} class="mr-4 h-6 w-6" />
 					<span class="text-sm font-medium">Create</span>
-				</button>
-
-				<button
-					class="flex w-full items-center px-4 py-2 text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800"
-				>
-					<Fa icon={faUser} class="mr-4 h-6 w-6" />
-					<span class="text-sm font-medium">Profile</span>
 				</button>
 			</div>
 		</div>
@@ -164,17 +162,17 @@
 
 	<!-- Mobile Top Bar -->
 	<div
-		class="fixed left-0 right-0 top-0 z-10 flex h-14 items-center justify-between border-b border-gray-200 bg-white px-4 md:hidden dark:border-gray-800 dark:bg-gray-900"
+		class="fixed left-0 right-0 top-0 z-10 flex h-16 items-center justify-between border-b border-gray-200 bg-white px-4 md:hidden dark:border-gray-800 dark:bg-gray-900"
 	>
 		<h1 class="text-xl font-bold text-gray-900 dark:text-white">🐸 Frogstagram</h1>
 		<div class="flex items-center space-x-4">
 			<button
-				class="rounded-md p-2 text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800"
+				class="rounded-md p-2 text-2xl text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800"
 			>
-				<Fa icon={faSquarePlus} class="h-6 w-6" />
+				<Fa icon={faSquarePlus} class="h-7 w-7" />
 			</button>
 			<button
-				class="rounded-md p-2 text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800"
+				class="rounded-md p-2 text-2xl text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800"
 			>
 				<Fa icon={faFrog} class="h-6 w-6" />
 			</button>
@@ -185,22 +183,20 @@
 	<div
 		class="fixed bottom-0 left-0 right-0 z-10 flex h-16 items-center justify-around border-t border-gray-200 bg-white px-4 md:hidden dark:border-gray-800 dark:bg-gray-900"
 	>
-		<button
-			class="flex flex-col items-center rounded-md p-2 text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800"
-		>
+		<button class="flex flex-col items-center p-2 text-gray-700 dark:text-gray-300">
 			<Fa icon={faHome} class="h-6 w-6" />
 			<span class="mt-1 text-xs">Home</span>
 		</button>
-		<button
-			class="flex flex-col items-center rounded-md p-2 text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800"
-		>
+		<button class="flex flex-col items-center p-2 text-gray-700 dark:text-gray-300">
 			<Fa icon={faMagnifyingGlass} class="h-6 w-6" />
 			<span class="mt-1 text-xs">Search</span>
 		</button>
-		<button
-			class="flex flex-col items-center rounded-md p-2 text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800"
-		>
-			<Fa icon={faUser} class="h-6 w-6" />
+		<button class="flex flex-col items-center p-2 text-gray-700 dark:text-gray-300">
+			<img
+				src="https://picsum.photos/seed/user1/40/40"
+				alt="Your profile"
+				class="h-6 w-6 rounded-full"
+			/>
 			<span class="mt-1 text-xs">Profile</span>
 		</button>
 	</div>
