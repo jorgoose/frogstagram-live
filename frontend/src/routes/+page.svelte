@@ -1,8 +1,7 @@
-<script>
-    // Import regular icons as default
+<script lang="ts">
+    // Import icons
     import {
         faUser,
-        faHeart,
         faComment,
         faSquarePlus,
         faCompass,
@@ -20,13 +19,33 @@
     import Fa from 'svelte-fa';
     import { writable } from 'svelte/store';
 
+    interface Post {
+        id: number;
+        user: {
+            name: string;
+            avatar: string;
+        };
+        image: string;
+        ribbits: number;
+        ribbited: boolean;
+        caption: string;
+        comments: number;
+    }
+
+    function toggleRibbited(post: Post) {
+        post.ribbited = !post.ribbited;
+        post.ribbits += post.ribbited ? 1 : -1;
+        mockPosts = [...mockPosts]; // Reassign to trigger reactivity
+    }
+
+
     const isMoreMenuOpen = writable(false);
 
     function toggleMoreMenu() {
         isMoreMenuOpen.update((value) => !value);
     }
 
-    const mockPosts = [
+    let mockPosts = [
         {
             id: 1,
             user: {
@@ -35,6 +54,7 @@
             },
             image: 'https://picsum.photos/seed/frog1/600/600',
             ribbits: 256,
+            ribbited: true,
             caption: "Just chillin' on a lily pad 🐸",
             comments: 42
         },
@@ -46,6 +66,7 @@
             },
             image: 'https://picsum.photos/seed/frog2/600/600',
             ribbits: 189,
+            ribbited: false,
             caption: 'Hopped into a new adventure today! 🌿',
             comments: 23
         },
@@ -57,6 +78,7 @@
             },
             image: 'https://picsum.photos/seed/frog3/600/600',
             ribbits: 312,
+            ribbited: false,
             caption: 'Caught a fly mid-air! #NinjaFrog',
             comments: 56
         }
@@ -215,14 +237,22 @@
 
                         <!-- Post Footer -->
                         <div class="p-4">
-                            <div class="mb-2 flex w-full items-center space-x-4">
-                                <button class="rounded-md p-2 text-gray-700 hover:bg-green-50 dark:text-gray-200 dark:hover:bg-green-900/20">
-                                    <Fa icon={faHeart} class="h-6 w-6" />
+                            <div class="mb-1 flex w-full items-center space-x-2">
+                                <button
+                                    class="rounded-md p-2 text-gray-700 text-2xl hover:bg-green-50 dark:text-gray-200 dark:hover:bg-green-900/20"
+                                    on:click={() => toggleRibbited(post)}
+                                >
+                                    <Fa
+                                        icon={faFrog}
+                                        class={`h-6 w-6 ${post.ribbited ? 'text-green-500' : 'text-white'}`}
+                                    />
                                 </button>
-                                <button class="rounded-md p-2 text-gray-700 hover:bg-green-50 dark:text-gray-200 dark:hover:bg-green-900/20">
-                                    <Fa icon={faComment} class="h-6 w-6" />
+                                <button class="rounded-md p-2 text-gray-700 text-2xl hover:bg-green-50 dark:text-gray-200 dark:hover:bg-green-900/20">
+                                    <Fa icon={faComment} class="h-6 w-6 transform scale-x-[-1]" />
                                 </button>
-                                <span class="ml-auto text-sm text-green-700 dark:text-green-400">
+                            </div>
+                            <div class="mb-2">
+                                <span class="text-sm text-green-700 font-semibold dark:text-green-400">
                                     {post.ribbits} ribbits
                                 </span>
                             </div>
