@@ -133,9 +133,9 @@
 
 				<!-- Main Navigation -->
 				<button
-					class="flex w-full items-center px-6 py-3 text-2xl text-gray-700 hover:bg-green-50 dark:text-gray-200 dark:hover:bg-green-900/20"
+					class="text-green-400 dark:text-green-400 flex w-full items-center px-6 py-3 text-2xl text-gray-700 hover:bg-green-50 dark:text-gray-200 dark:hover:bg-green-900/20"
 				>
-					<Fa icon={faHome} class="mr-4 h-6 w-6" />
+					<Fa icon={faHome} class="mr-4 h-6 w-6 " />
 					<span class="text-sm font-medium">Home</span>
 				</button>
 
