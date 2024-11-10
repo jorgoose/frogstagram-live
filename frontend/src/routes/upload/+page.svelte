@@ -35,7 +35,7 @@
             selectedFile = input.files[0];
             uploadedImage.set(selectedFile);
             // Navigate to the create page after selecting the file
-            goto('/create', { replaceState: false });
+            goto('/create/edit', { replaceState: false });
         }
     }
 </script>
