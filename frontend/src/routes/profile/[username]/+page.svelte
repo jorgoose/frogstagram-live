@@ -28,9 +28,12 @@
         isMoreMenuOpen.update((value) => !value);
     }
 
+    // Get user from session
+    import { page } from '$app/stores';
+	$: username = $page.data.session?.user?.username;
+
     // Mock user data
     const user = {
-        username: 'froglover123',
         displayName: 'Lily Padsworth 🐸',
         bio: 'Just a frog enthusiast hopping through life | Nature photographer 📸',
         profileImage: 'https://picsum.photos/seed/user1/150/150',
@@ -124,7 +127,7 @@
                     class="mr-3 h-8 w-8 rounded-full"
                 />
                 <div class="flex-1 text-left">
-                    <div class="text-sm font-medium">YourUsername</div>
+                    <div class="text-sm font-medium">{username || 'Loading...'}</div>
                     <div class="text-xs text-green-700 dark:text-green-400">View Profile</div>
                 </div>
             </button>
