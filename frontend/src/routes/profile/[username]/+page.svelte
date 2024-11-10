@@ -78,10 +78,10 @@
                 </h2>
 
                 <!-- Main Navigation -->
-                <button class="flex w-full items-center px-6 py-3 text-2xl text-gray-700 hover:bg-green-50 dark:text-gray-200 dark:hover:bg-green-900/20">
+                <a href="/" class="flex w-full items-center px-6 py-3 text-2xl text-gray-700 hover:bg-green-50 dark:text-gray-200 dark:hover:bg-green-900/20">
                     <Fa icon={faHome} class="mr-4 h-6 w-6" />
                     <span class="text-sm font-medium">Home</span>
-                </button>
+                </a>
 
                 <button class="flex w-full items-center px-6 py-3 text-2xl text-gray-700 hover:bg-green-50 dark:text-gray-200 dark:hover:bg-green-900/20">
                     <Fa icon={faCompass} class="mr-4 h-6 w-6" />
@@ -154,10 +154,10 @@
 
     <!-- Mobile Bottom Navigation - Same as homepage -->
     <div class="fixed bottom-0 left-0 right-0 z-10 flex h-16 items-center justify-around border-t border-gray-200 bg-white px-4 md:hidden dark:border-gray-800 dark:bg-gray-900">
-        <button class="flex flex-col items-center p-2 text-gray-700 dark:text-gray-200">
+        <a href="/" class="flex flex-col items-center p-2 text-gray-700 dark:text-gray-200">
             <Fa icon={faHome} class="h-6 w-6" />
             <span class="mt-1 text-xs">Home</span>
-        </button>
+        </a>
         <button class="flex flex-col items-center p-2 text-gray-700 dark:text-gray-200">
             <Fa icon={faMagnifyingGlass} class="h-6 w-6" />
             <span class="mt-1 text-xs">Search</span>
