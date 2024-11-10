@@ -7,7 +7,7 @@ export const POST: RequestHandler = async ({ request }) => {
     const { username, code } = await request.json();
     await confirmSignUp(username, code);
     return json({ success: true });
-  } catch (error: any) {
+  } catch (error: Error) {
     return json(
       { 
         success: false, 

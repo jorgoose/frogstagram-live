@@ -11,11 +11,11 @@ export const POST: RequestHandler = async ({ request }) => {
         success: true,
         username // Return username for verification page
       });
-    } catch (error: any) {
+    } catch (error: unknown) {
       return json(
         { 
           success: false, 
-          message: error.message || 'Failed to create account' 
+          message: error instanceof Error ? error.message : 'Failed to create account' 
         }, 
         { status: 400 }
       );

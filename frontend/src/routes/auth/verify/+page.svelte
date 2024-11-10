@@ -42,8 +42,8 @@
           username,
           password: tempPassword,
           callbackUrl: '/'
-        });
-  
+        }) as { error?: string };
+
         if (signInResult?.error) {
           error = signInResult.error;
           return;
