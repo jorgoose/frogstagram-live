@@ -17,7 +17,7 @@ interface Session {
 const unprotectedRoutes = ['/auth/login', '/auth/sign-up', '/auth/verify'];
 
 export const load: LayoutServerLoad = async ({ locals, url }) => {
-  const session = await locals.getSession() as Session | null;
+  const session = (await locals.getSession()) as Session | null;
 
   if (unprotectedRoutes.includes(url.pathname)) {
     return { session };
