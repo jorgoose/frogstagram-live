@@ -28,9 +28,15 @@
         isMoreMenuOpen.update((value) => !value);
     }
 
+    // Define User type
+    type User = {
+        username: string;
+        // other props...
+    };
+
     // Get user from session
     import { page } from '$app/stores';
-	$: username = $page.data.session?.user?.username;
+    $: username = ($page.data.session?.user as User)?.username;
 
     // Mock user data
     const user = {
@@ -144,7 +150,7 @@
 
     <!-- Mobile Top Bar -->
     <div class="fixed left-0 right-0 top-0 z-10 flex h-16 items-center justify-between border-b border-gray-200 bg-white px-4 md:hidden dark:border-gray-800 dark:bg-gray-900">
-        <h1 class="text-xl font-bold text-gray-900 dark:text-white">{user.username}</h1>
+        <h1 class="text-xl font-bold text-gray-900 dark:text-white">{username}</h1>
         <div class="flex items-center space-x-4">
             <button class="rounded-md p-2 text-gray-700 hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-800">
                 <Fa icon={faBookmark} class="h-6 w-6" />
@@ -185,7 +191,7 @@
                     <div class="flex items-start mb-4">
                         <img 
                             src={user.profileImage} 
-                            alt={user.username}
+                            alt={username}
                             class="w-20 h-20 rounded-full object-cover"
                         />
                         <div class="flex-1 ml-4">
