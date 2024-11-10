@@ -7,11 +7,11 @@ export const POST: RequestHandler = async ({ request }) => {
     const { username, code } = await request.json();
     await confirmSignUp(username, code);
     return json({ success: true });
-  } catch (error: Error) {
+  } catch (error: unknown) {
     return json(
       { 
         success: false, 
-        message: error.message || 'Failed to verify account' 
+        message: error instanceof Error ? error.message : 'Failed to verify account' 
       }, 
       { status: 400 }
     );
