@@ -1,3 +1,4 @@
+```svelte
 <script lang="ts">
     // Import regular icons
     import {
@@ -27,13 +28,6 @@
     function toggleMoreMenu() {
         isMoreMenuOpen.update((value) => !value);
     }
-
-    // Handle profile click
-    const goToProfile = () => {
-        if (user?.username) {
-            goto(`/profile/${user.username}`);
-        }
-    };
 
     // Mock user data
     const user = {
@@ -240,3 +234,4 @@
         </div>
     </div>
 </div>
+```
