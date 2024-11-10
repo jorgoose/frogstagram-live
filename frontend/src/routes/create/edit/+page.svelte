@@ -185,7 +185,7 @@
 
 <div class="flex flex-col h-screen bg-gray-50 dark:bg-gray-900">
     <!-- Top Bar -->
-    <div class="flex items-center justify-between p-4 bg-white border-b border-gray-200 dark:bg-gray-900 dark:border-gray-700">
+    <div class="flex items-center justify-between h-14 px-4 bg-white border-b border-gray-200 dark:bg-gray-900 dark:border-gray-700">
         <button 
             on:click={handleClear} 
             class="text-xl text-gray-700 dark:text-gray-200 p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-md transition-colors"
