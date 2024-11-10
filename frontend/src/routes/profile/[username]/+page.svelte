@@ -1,4 +1,3 @@
-```svelte
 <script lang="ts">
     // Import regular icons
     import {
@@ -234,4 +233,3 @@
         </div>
     </div>
 </div>
-```
