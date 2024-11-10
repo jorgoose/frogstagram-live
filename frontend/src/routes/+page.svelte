@@ -20,6 +20,7 @@
 	import { goto } from '$app/navigation';
 	import Fa from 'svelte-fa';
 	import { writable } from 'svelte/store';
+	import { signOut } from '@auth/sveltekit/client';
 
 	interface Post {
 		id: number;
@@ -45,6 +46,11 @@
 	function toggleMoreMenu() {
 		isMoreMenuOpen.update((value) => !value);
 	}
+
+	// Logout handler
+	const handleLogout = async () => {
+		await signOut({ callbackUrl: '/auth/login' });
+	};
 
 	// Get user from session
 	$: user = $page.data.session?.user;
@@ -171,6 +177,7 @@
 					</button>
 					<button
 						class="flex w-full items-center rounded-md px-2 py-2 text-gray-700 hover:bg-green-50 dark:text-gray-200 dark:hover:bg-green-900/20"
+						on:click={handleLogout}
 					>
 						<Fa icon={faRightFromBracket} class="mr-3 h-5 w-5" />
 						<span class="text-sm">Log Out</span>
