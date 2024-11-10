@@ -19,6 +19,7 @@
 		"@sveltejs/kit": "^2.0.0",
 		"@sveltejs/vite-plugin-svelte": "^4.0.0",
 		"@types/eslint": "^9.6.0",
+		"@types/node": "^22.9.0",
 		"autoprefixer": "^10.4.20",
 		"eslint": "^9.7.0",
 		"eslint-config-prettier": "^9.1.0",
@@ -35,8 +36,11 @@
 		"vite": "^5.0.3"
 	},
 	"dependencies": {
+		"@auth/core": "^0.37.3",
+		"@auth/sveltekit": "^1.7.3",
 		"@fortawesome/free-regular-svg-icons": "^6.6.0",
 		"@fortawesome/free-solid-svg-icons": "^6.6.0",
+		"amazon-cognito-identity-js": "^6.3.12",
 		"svelte-easy-crop": "^3.0.1",
 		"svelte-fa": "^4.0.3"
 	}
