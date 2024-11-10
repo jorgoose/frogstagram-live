@@ -49,7 +49,7 @@
         {
             id: 1,
             user: {
-                name: 'FrogLover123',
+                name: 'froglover123',
                 avatar: 'https://picsum.photos/seed/user1/40/40'
             },
             image: 'https://picsum.photos/seed/frog1/600/600',
@@ -61,7 +61,7 @@
         {
             id: 2,
             user: {
-                name: 'ToadTalker',
+                name: 'toadtalker',
                 avatar: 'https://picsum.photos/seed/user2/40/40'
             },
             image: 'https://picsum.photos/seed/frog2/600/600',
@@ -73,7 +73,7 @@
         {
             id: 3,
             user: {
-                name: 'RibbitRanger',
+                name: 'ribbitranger',
                 avatar: 'https://picsum.photos/seed/user3/40/40'
             },
             image: 'https://picsum.photos/seed/frog3/600/600',
