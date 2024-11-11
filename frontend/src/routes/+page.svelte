@@ -363,14 +363,21 @@
 						<!-- Post Header -->
 						<div class="flex flex-row items-center space-x-4 p-4">
 							<div class="relative h-10 w-10">
-								<img
-									src={`https://picsum.photos/seed/${post.owner}/40/40`}
-									alt={post.owner}
-									class="h-10 w-10 rounded-full object-cover"
-									loading="lazy"
-								/>
+								<a href={`/profile/${post.owner}`}>
+									<img
+										src={`https://picsum.photos/seed/${post.owner}/40/40`}
+										alt={post.owner}
+										class="h-10 w-10 rounded-full object-cover cursor-pointer"
+										loading="lazy"
+									/>
+								</a>
 							</div>
-							<span class="font-semibold text-gray-900 dark:text-white">{post.owner}</span>
+							<a 
+								href={`/profile/${post.owner}`}
+								class="font-semibold text-gray-900 dark:text-white"
+							>
+								{post.owner}
+							</a>
 						</div>
 
 						<!-- Post Image -->
@@ -407,7 +414,12 @@
 								</span>
 							</div>
 							<p class="text-sm text-gray-900 dark:text-white">
-								<span class="mr-2 font-semibold">{post.owner}</span>
+								<a 
+									href={`/profile/${post.owner}`}
+									class="mr-2 font-semibold"
+								>
+									{post.owner}
+								</a>
 								{post.caption}
 							</p>
 							<button class="mt-1 text-sm text-green-700 hover:underline dark:text-green-400">
