@@ -85,7 +85,7 @@
 		try {
 			const params = new URLSearchParams();
 			if (cursor) params.append('cursor', cursor);
-			params.append('owner', sessionUsername);
+			params.append('owner', routeUsername);
 
 			const response = await fetch(`/api/posts?${params}`);
 			if (!response.ok) throw new Error('Failed to fetch posts');
@@ -249,7 +249,7 @@
 
 	<!-- Mobile Top Bar -->
 	<div class="fixed left-0 right-0 top-0 z-10 flex h-16 items-center justify-between border-b border-gray-200 bg-white px-4 md:hidden dark:border-gray-800 dark:bg-gray-900">
-		<h1 class="text-xl font-bold text-gray-900 dark:text-white">{sessionUsername}</h1>
+		<h1 class="text-xl font-bold text-gray-900 dark:text-white">{routeUsername}</h1>
 		<div class="flex items-center space-x-4">
 			<button 
 				class="rounded-md p-2 text-gray-700 hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-800"
@@ -313,7 +313,7 @@
 					<div class="mb-4 flex items-start">
 						<img
 							src={user.profileImage}
-							alt={sessionUsername}
+							alt={routeUsername}
 							class="h-20 w-20 rounded-full object-cover"
 						/>
 						<div class="ml-4 flex-1">
@@ -337,7 +337,7 @@
 
 					<!-- Bio -->
 					<div class="mb-4">
-						<div class="font-semibold text-gray-900 dark:text-white">{sessionUsername}</div>
+						<div class="font-semibold text-gray-900 dark:text-white">{routeUsername}</div>
 						<div class="whitespace-pre-line text-gray-900 dark:text-gray-200">{user.bio}</div>
 					</div>
 
