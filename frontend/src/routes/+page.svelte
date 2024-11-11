@@ -21,24 +21,119 @@
 	import Fa from 'svelte-fa';
 	import { writable } from 'svelte/store';
 	import { signOut } from '@auth/sveltekit/client';
+	import { onMount } from 'svelte';
 
 	interface Post {
-		id: number;
-		user: {
-			name: string;
-			avatar: string;
-		};
-		image: string;
-		ribbits: number;
-		ribbited: boolean;
+		post_id: string;
+		owner: string;
+		image_path: string;
 		caption: string;
-		comments: number;
+		timestamp: string;
+		likes: {
+			count: number;
+			users: string[];
+		};
+		comments: Array<{
+			id: string;
+			owner: string;
+			text: string;
+			timestamp: string;
+			likes: {
+				count: number;
+				users: string[];
+			};
+		}>;
 	}
 
-	function toggleRibbited(post: Post) {
-		post.ribbited = !post.ribbited;
-		post.ribbits += post.ribbited ? 1 : -1;
-		mockPosts = [...mockPosts]; // Reassign to trigger reactivity
+	let posts: Post[] = [];
+	let isLoading = true;
+	let hasMore = true;
+	let loadingMore = false;
+
+	async function fetchPosts(cursor?: string) {
+		try {
+			const params = new URLSearchParams();
+			if (cursor) params.append('cursor', cursor);
+
+			const response = await fetch(`/api/posts?${params}`);
+			if (!response.ok) throw new Error('Failed to fetch posts');
+
+			const data = await response.json();
+
+			posts = cursor ? [...posts, ...data.posts] : data.posts;
+			hasMore = data.hasMore;
+		} catch (error) {
+			console.error('Error:', error);
+		} finally {
+			isLoading = false;
+			loadingMore = false;
+		}
+	}
+
+	function handleScroll(e: Event) {
+		const target = e.target as HTMLElement;
+		const bottom = target.scrollHeight - target.scrollTop === target.clientHeight;
+
+		if (bottom && hasMore && !loadingMore && !isLoading) {
+			loadingMore = true;
+			const lastPost = posts[posts.length - 1];
+			fetchPosts(lastPost.timestamp);
+		}
+	}
+
+	onMount(() => {
+		fetchPosts();
+	});
+
+	async function toggleRibbited(post: Post) {
+		if (!user?.username) return; // Early return if no user
+		
+		const hasLiked = post.likes.users.includes(user.username);
+
+		// Optimistic update
+		posts = posts.map((p) => {
+			if (p.post_id === post.post_id) {
+				return {
+					...p,
+					likes: {
+						count: p.likes.count + (hasLiked ? -1 : 1),
+						users: hasLiked
+							? p.likes.users.filter((u) => u !== user.username)
+							: [...p.likes.users, user.username]
+					}
+				};
+			}
+			return p;
+		});
+
+		try {
+			const response = await fetch(`/api/posts/${post.post_id}/like`, {
+				method: hasLiked ? 'DELETE' : 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({ username: user.username })
+			});
+
+			if (!response.ok) {
+				throw new Error('Failed to update like');
+			}
+		} catch (error) {
+			console.error('Error:', error);
+			// Revert optimistic update on failure
+			posts = posts.map((p) => {
+				if (p.post_id === post.post_id) {
+					return {
+						...p,
+						likes: {
+							count: p.likes.count + (hasLiked ? 1 : -1),
+							users: hasLiked
+								? [...p.likes.users, user?.username || '']
+								: p.likes.users.filter((u) => u !== user?.username)
+						}
+					};
+				}
+				return p;
+			});
+		}
 	}
 
 	const isMoreMenuOpen = writable(false);
@@ -102,7 +197,7 @@
 	];
 </script>
 
-<div class="flex h-screen bg-white dark:bg-gray-900">
+<div class="flex h-screen bg-white dark:bg-gray-900" on:scroll={handleScroll}>
 	<!-- Desktop Sidebar -->
 	<nav
 		class="hidden w-64 flex-shrink-0 flex-col border-r border-gray-200 md:flex dark:border-gray-800"
@@ -133,7 +228,7 @@
 
 				<!-- Main Navigation -->
 				<button
-					class="text-green-400 dark:text-green-400 flex w-full items-center px-6 py-3 text-2xl text-gray-700 hover:bg-green-50 dark:text-gray-200 dark:hover:bg-green-900/20"
+					class="flex w-full items-center px-6 py-3 text-2xl text-gray-700 text-green-400 hover:bg-green-50 dark:text-gray-200 dark:text-green-400 dark:hover:bg-green-900/20"
 				>
 					<Fa icon={faHome} class="mr-4 h-6 w-6 " />
 					<span class="text-sm font-medium">Home</span>
@@ -261,7 +356,7 @@
 	<div class="flex-1 overflow-y-auto bg-gray-50 dark:bg-gray-900">
 		<div class="flex h-full w-full justify-center">
 			<div class="w-full max-w-lg px-4 pb-24 pt-20 md:pb-20 md:pt-8">
-				{#each mockPosts as post (post.id)}
+				{#each posts as post (post.post_id)}
 					<div
 						class="mb-6 rounded-lg border border-gray-200 bg-white shadow-sm dark:border-gray-800 dark:bg-gray-800"
 					>
@@ -269,19 +364,19 @@
 						<div class="flex flex-row items-center space-x-4 p-4">
 							<div class="relative h-10 w-10">
 								<img
-									src={post.user.avatar}
-									alt={post.user.name}
+									src={`https://picsum.photos/seed/${post.owner}/40/40`}
+									alt={post.owner}
 									class="h-10 w-10 rounded-full object-cover"
 									loading="lazy"
 								/>
 							</div>
-							<span class="font-semibold text-gray-900 dark:text-white">{post.user.name}</span>
+							<span class="font-semibold text-gray-900 dark:text-white">{post.owner}</span>
 						</div>
 
 						<!-- Post Image -->
 						<div class="aspect-square w-full bg-gray-100 dark:bg-gray-700">
 							<img
-								src={post.image}
+								src={`/api/images/${post.image_path}`}
 								alt="Post content"
 								class="h-full w-full object-cover"
 								loading="lazy"
@@ -297,7 +392,7 @@
 								>
 									<Fa
 										icon={faFrog}
-										class={`h-6 w-6 ${post.ribbited ? 'text-green-500' : 'text-white'}`}
+										class={`h-6 w-6 ${post.likes.users.includes(user?.username || '') ? 'text-green-500' : 'text-white'}`}
 									/>
 								</button>
 								<button
@@ -308,15 +403,15 @@
 							</div>
 							<div class="mb-2">
 								<span class="text-sm font-semibold text-green-700 dark:text-green-400">
-									{post.ribbits} ribbits
+									{post.likes.count} {post.likes.count === 1 ? 'ribbit' : 'ribbits'}
 								</span>
 							</div>
 							<p class="text-sm text-gray-900 dark:text-white">
-								<span class="mr-2 font-semibold">{post.user.name}</span>
+								<span class="mr-2 font-semibold">{post.owner}</span>
 								{post.caption}
 							</p>
 							<button class="mt-1 text-sm text-green-700 hover:underline dark:text-green-400">
-								View all {post.comments} comments
+								View all {post.comments.length} comments
 							</button>
 							<div class="mt-2 w-full">
 								<input

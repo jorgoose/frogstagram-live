@@ -3,6 +3,7 @@
 	import { writable } from 'svelte/store';
 	import { v4 as uuidv4 } from 'uuid';
 	import { croppedImage } from '../../../stores/croppedImage';
+	import { page } from '$app/stores';
 	import { goto } from '$app/navigation';
 
 	let imageFile: File | null = null;
@@ -12,9 +13,15 @@
 	let analysisResult = writable<string | null>(null);
 	let uploadProgress = writable(0);
 	let progressInterval: NodeJS.Timeout;
+	let redirectCountdown = writable<number | null>(null);
+	let redirectInterval: NodeJS.Timeout;
 
 	const BUCKET = 'frogstagram-posts';
-	const username = 'test_user';
+
+	// / Get user from page session
+	type User = { username: string };
+	$: username = ($page.data.session?.user as User)?.username;
+	
 
 	onMount(() => {
 		const unsubscribe = croppedImage.subscribe((file) => {
@@ -30,6 +37,7 @@
 			unsubscribe();
 			if (imageUrl) {
 				URL.revokeObjectURL(imageUrl);
+				clearInterval(redirectInterval);
 			}
 		};
 	});
@@ -51,7 +59,7 @@
 	}
 
 	async function handleShare() {
-		if (!imageFile) return;
+		if (!imageFile || $loading) return; // Prevent multiple clicks
 
 		loading.set(true);
 		analysisResult.set(null);
@@ -68,7 +76,7 @@
 		}, 15); // Adjust speed as needed
 
 		const postId = uuidv4();
-		const imageKey = `posts/${username}/${postId}.jpg`;
+		const imageKey = `posts/${username}/${postId}/post_image.jpg`;
 		const metadataKey = `metadata/${postId}/post.json`;
 
 		try {
@@ -148,6 +156,20 @@
 			} else {
 				analysisResult.set(`Not confident this is a frog. Confidence: ${analysisData.confidence}`);
 			}
+
+			// After analysis is complete:
+			redirectCountdown.set(5);
+			redirectInterval = setInterval(() => {
+				redirectCountdown.update(count => {
+					if (count === 1) {
+						clearInterval(redirectInterval);
+						goto('/'); // Redirect to homepage
+						return 0;
+					}
+					return count !== null ? count - 1 : null;
+				});
+			}, 1000);
+
 		} catch (error) {
 			console.error(error);
 			analysisResult.set('Error processing image');
@@ -177,12 +199,11 @@
 		<button
 			on:click={handleShare}
 			class="rounded-md p-2 text-lg font-medium text-green-600 transition-colors hover:bg-green-50 dark:text-green-400 dark:hover:bg-green-900/20"
-			disabled={$loading}
+			disabled={$loading || $analysisResult !== null}
 		>
 			{#if $loading}
 				Analyzing...
-			{/if}
-			{#if !$loading}
+			{:else}
 				Share
 			{/if}
 		</button>
@@ -261,6 +282,9 @@
 										<p class="text-lg text-gray-400">
 											{Math.round(parseFloat($analysisResult.split(': ')[1]) * 100)}% Confidence
 										</p>
+										{#if $redirectCountdown}
+											<p class="text-sm text-gray-400">Redirecting in {$redirectCountdown}...</p>
+										{/if}
 									</div>
 								</div>
 							{:else}
@@ -276,6 +300,9 @@
 										<p class="text-sm text-gray-400">Our frog detector is ribbiting with disappointment!</p>
 										<p class="text-sm text-gray-500">Frogstagram is for frogs only - nothing else allowed 🐸</p>
 									</div>
+									{#if $redirectCountdown}
+										<p class="text-sm text-gray-400">Redirecting in {$redirectCountdown}...</p>
+									{/if}
 								</div>
 							{/if}
 						</div>
