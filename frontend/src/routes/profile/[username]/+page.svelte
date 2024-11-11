@@ -44,7 +44,9 @@
 
 	// Get user from session
 	import { page } from '$app/stores';
-	$: username = ($page.data.session?.user as User)?.username;
+	$: sessionUsername = ($page.data.session?.user as User)?.username;
+	$: routeUsername = $page.params.username;
+	$: isOwnProfile = sessionUsername === routeUsername;
 
 	interface Post {
 		post_id: string;
@@ -83,7 +85,7 @@
 		try {
 			const params = new URLSearchParams();
 			if (cursor) params.append('cursor', cursor);
-			params.append('owner', username);
+			params.append('owner', sessionUsername);
 
 			const response = await fetch(`/api/posts?${params}`);
 			if (!response.ok) throw new Error('Failed to fetch posts');
@@ -123,6 +125,20 @@
 			fetchUserPosts(lastPost.timestamp);
 		}
 	}
+
+	// Mock stats (to be replaced with real data later)
+	let followStats = {
+		followers: 0,
+		following: 0
+	};
+
+	// Follow state (to be replaced with real data later)
+	let isFollowing = false;
+	
+	const handleFollowToggle = async () => {
+		isFollowing = !isFollowing;
+		// TODO: Implement actual follow/unfollow API call
+	};
 </script>
 
 <div class="flex h-screen bg-white dark:bg-gray-900">
@@ -216,7 +232,7 @@
 					class="mr-3 h-8 w-8 rounded-full"
 				/>
 				<div class="flex-1 text-left">
-					<div class="text-sm font-medium">{username || 'Loading...'}</div>
+					<div class="text-sm font-medium">{sessionUsername || 'Loading...'}</div>
 					<div class="text-xs text-green-700 dark:text-green-400">View Profile</div>
 				</div>
 			</button>
@@ -233,7 +249,7 @@
 
 	<!-- Mobile Top Bar -->
 	<div class="fixed left-0 right-0 top-0 z-10 flex h-16 items-center justify-between border-b border-gray-200 bg-white px-4 md:hidden dark:border-gray-800 dark:bg-gray-900">
-		<h1 class="text-xl font-bold text-gray-900 dark:text-white">{username}</h1>
+		<h1 class="text-xl font-bold text-gray-900 dark:text-white">{sessionUsername}</h1>
 		<div class="flex items-center space-x-4">
 			<button 
 				class="rounded-md p-2 text-gray-700 hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-800"
@@ -297,15 +313,23 @@
 					<div class="mb-4 flex items-start">
 						<img
 							src={user.profileImage}
-							alt={username}
+							alt={sessionUsername}
 							class="h-20 w-20 rounded-full object-cover"
 						/>
 						<div class="ml-4 flex-1">
-							<!-- Stats - Only Posts -->
-							<div class="flex justify-center text-center">
+							<!-- Stats - Posts, Followers, Following -->
+							<div class="flex justify-around text-center">
 								<div>
 									<div class="font-semibold text-gray-900 dark:text-white">{userStats.posts}</div>
 									<div class="text-sm text-gray-500">posts</div>
+								</div>
+								<div>
+									<div class="font-semibold text-gray-900 dark:text-white">{followStats.followers}</div>
+									<div class="text-sm text-gray-500">followers</div>
+								</div>
+								<div>
+									<div class="font-semibold text-gray-900 dark:text-white">{followStats.following}</div>
+									<div class="text-sm text-gray-500">following</div>
 								</div>
 							</div>
 						</div>
@@ -313,16 +337,25 @@
 
 					<!-- Bio -->
 					<div class="mb-4">
-						<div class="font-semibold text-gray-900 dark:text-white">{username}</div>
+						<div class="font-semibold text-gray-900 dark:text-white">{sessionUsername}</div>
 						<div class="whitespace-pre-line text-gray-900 dark:text-gray-200">{user.bio}</div>
 					</div>
 
-					<!-- Edit Profile Button -->
-					<button
-						class="w-full rounded-md bg-gray-100 px-4 py-1.5 text-sm font-semibold text-gray-900 transition-colors hover:bg-gray-200 dark:bg-gray-800 dark:text-white dark:hover:bg-gray-700"
-					>
-						Edit profile
-					</button>
+					<!-- Edit Profile or Follow Button -->
+					{#if isOwnProfile}
+						<button
+							class="w-full rounded-md bg-gray-100 px-4 py-1.5 text-sm font-semibold text-gray-900 transition-colors hover:bg-gray-200 dark:bg-gray-800 dark:text-white dark:hover:bg-gray-700"
+						>
+							Edit profile
+						</button>
+					{:else}
+						<button
+							class="w-full rounded-md {isFollowing ? 'bg-gray-100 dark:bg-gray-800' : 'bg-green-600 dark:bg-green-500'} px-4 py-1.5 text-sm font-semibold {isFollowing ? 'text-gray-900 dark:text-white' : 'text-white'} transition-colors {isFollowing ? 'hover:bg-gray-200 dark:hover:bg-gray-700' : 'hover:bg-green-700 dark:hover:bg-green-600'}"
+							on:click={handleFollowToggle}
+						>
+							{isFollowing ? 'Following' : 'Follow'}
+						</button>
+					{/if}
 				</div>
 
 				<!-- Post Grid -->
