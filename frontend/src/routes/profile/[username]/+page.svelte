@@ -22,11 +22,17 @@
 	import Fa from 'svelte-fa';
 	import { writable } from 'svelte/store';
 	import { onMount } from 'svelte';
+    import { signOut } from '@auth/sveltekit/client';
 
 	const isMoreMenuOpen = writable(false);
+	const isMobileMenuOpen = writable(false);
 
 	function toggleMoreMenu() {
 		isMoreMenuOpen.update((value) => !value);
+	}
+
+	function toggleMobileMenu() {
+		isMobileMenuOpen.update((value) => !value);
 	}
 
 	// Define User type
@@ -101,6 +107,11 @@
 	onMount(() => {
 		fetchUserPosts();
 	});
+
+    // Logout handler
+	const handleLogout = async () => {
+		await signOut({ callbackUrl: '/auth/login' });
+	};
 
 	function handleScroll(e: Event) {
 		const target = e.target as HTMLElement;
@@ -221,21 +232,36 @@
 	</nav>
 
 	<!-- Mobile Top Bar -->
-	<div
-		class="fixed left-0 right-0 top-0 z-10 flex h-16 items-center justify-between border-b border-gray-200 bg-white px-4 md:hidden dark:border-gray-800 dark:bg-gray-900"
-	>
+	<div class="fixed left-0 right-0 top-0 z-10 flex h-16 items-center justify-between border-b border-gray-200 bg-white px-4 md:hidden dark:border-gray-800 dark:bg-gray-900">
 		<h1 class="text-xl font-bold text-gray-900 dark:text-white">{username}</h1>
 		<div class="flex items-center space-x-4">
-			<button
+			<button 
 				class="rounded-md p-2 text-gray-700 hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-800"
 			>
 				<Fa icon={faBookmark} class="h-6 w-6" />
 			</button>
-			<button
-				class="rounded-md p-2 text-gray-700 hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-800"
-			>
-				<Fa icon={faGear} class="h-6 w-6" />
-			</button>
+			<div class="relative">
+				<button
+					class="rounded-md p-2 text-gray-700 hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-800"
+					on:click={toggleMobileMenu}
+				>
+					<Fa icon={faGear} class="h-6 w-6" />
+				</button>
+
+				{#if $isMobileMenuOpen}
+					<div class="absolute right-0 top-12 w-48 rounded-md border border-gray-200 bg-white shadow-lg dark:border-gray-700 dark:bg-gray-800">
+						<div class="py-1">
+							<button
+								class="flex w-full items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-700"
+								on:click={handleLogout}
+							>
+								<Fa icon={faRightFromBracket} class="mr-3 h-4 w-4" />
+								<span>Log Out</span>
+							</button>
+						</div>
+					</div>
+				{/if}
+			</div>
 		</div>
 	</div>
 
