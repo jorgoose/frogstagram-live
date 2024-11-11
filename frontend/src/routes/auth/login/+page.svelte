@@ -39,7 +39,7 @@
 				<p class="mt-2 text-sm text-gray-600 dark:text-gray-400">Sign in to continue</p>
 				<div class="mt-4 rounded-lg bg-green-50 p-3 dark:bg-green-900/20">
 					<p class="text-sm text-green-800 dark:text-green-300">
-						Hop in! Frogstagram is like Instagram, but exclusively for frogs 🐸
+						Hop in! Frogstagram is like Instagram, but exclusively for photos of frogs 🐸
 					</p>
 				</div>
 			</div>
