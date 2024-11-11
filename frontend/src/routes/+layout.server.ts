@@ -30,14 +30,5 @@ export const load: LayoutServerLoad = async ({ locals, url }) => {
   // Log session data to debug
   console.log('Session data:', session);
 
-  return {
-    session: {
-      ...session,
-      user: {
-        ...session.user,
-        // Ensure username is available
-        username: session.user.username || session.user.email?.split('@')[0] || 'user'
-      }
-    }
-  };
+  return { session };
 };
