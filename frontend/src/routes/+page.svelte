@@ -354,8 +354,8 @@
 
 	<!-- Main Content Area -->
 	<div class="flex-1 overflow-y-auto bg-gray-50 dark:bg-gray-900">
-		<div class="flex h-full w-full justify-center">
-			<div class="w-full max-w-lg px-4 pb-24 pt-20 md:pb-20 md:pt-8">
+		<div class="flex w-full justify-center">
+			<div class="w-full max-w-lg px-4 pb-12 pt-20 md:pb-20 md:pt-8">
 				{#each posts as post (post.post_id)}
 					<div
 						class="mb-6 rounded-lg border border-gray-200 bg-white shadow-sm dark:border-gray-800 dark:bg-gray-800"
