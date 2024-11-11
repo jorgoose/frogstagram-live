@@ -19,6 +19,7 @@ const s3Client = new S3Client({
 export const GET: RequestHandler = async ({ url }) => {
     try {
         const cursor = url.searchParams.get('cursor');
+        const owner = url.searchParams.get('owner');
         
         // List metadata objects
         const listCommand = new ListObjectsV2Command({
@@ -35,7 +36,7 @@ export const GET: RequestHandler = async ({ url }) => {
         }
 
         // Fetch each post's metadata
-        const posts = await Promise.all(
+        let posts = await Promise.all(
             listedObjects.Contents
                 .filter(obj => obj.Key?.endsWith('post.json'))
                 .map(async (obj) => {
@@ -49,6 +50,11 @@ export const GET: RequestHandler = async ({ url }) => {
                     return JSON.parse(metadata || '{}');
                 })
         );
+
+        // Filter by owner if specified
+        if (owner) {
+            posts = posts.filter(post => post.owner === owner);
+        }
 
         // Sort by timestamp descending
         posts.sort((a, b) => 
