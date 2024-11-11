@@ -24,7 +24,7 @@ const extractUserFromSession = (session: CognitoUserSessionType): AuthUser => {
   return {
     id: user.sub,
     // Extract the username
-    username: user.username,
+    username: user.username, // FIXED: use username from Cognito token
     email: user.email,
     image: user.picture,
     accessToken: session.getAccessToken().getJwtToken(),
@@ -40,7 +40,7 @@ const createTokenFromUser = (user: AuthUser): AuthToken => {
     refreshToken: user.refreshToken,
     user: {
       id: user.id,
-      name: user.name,
+      username: user.username, // FIXED: use username field
       email: user.email,
       image: user.image,
     },
@@ -100,8 +100,24 @@ export const { handle } = SvelteKitAuth({
       }
     },
     async session({ session, token }) {
-      session.user = token.user;
-      session.accessToken = token.accessToken;
+      // Include username from token.user
+      session.user = {
+        id: token.user.id,
+        username: token.user.username, // Add username from token
+        email: token.user.email
+      };
+      
+      // If token.user doesn't have username but we have accessToken
+      if (!session.user.username && token.accessToken) {
+        try {
+          // Get username from JWT payload
+          const payload = JSON.parse(Buffer.from(token.accessToken.split('.')[1], 'base64').toString());
+          session.user.username = payload.username;
+        } catch (error) {
+          console.error('Failed to extract username from token:', error);
+        }
+      }
+    
       session.error = token.error;
       return session;
     }
