@@ -59,120 +59,120 @@
 	}
 
 	async function handleShare() {
-		if (!imageFile || $loading) return; // Prevent multiple clicks
+		if (!imageFile || $loading) return;
 
 		loading.set(true);
 		analysisResult.set(null);
 		uploadProgress.set(0);
-
-		// Start progress animation
-		progressInterval = setInterval(() => {
-			uploadProgress.update((p) => {
-				if (p < 80) {
-					return p + 1;
-				}
-				return p;
-			});
-		}, 15); // Adjust speed as needed
 
 		const postId = uuidv4();
 		const imageKey = `posts/${username}/${postId}/post_image.jpg`;
 		const metadataKey = `metadata/${postId}/post.json`;
 
 		try {
-			// Step 1: Get pre-signed URL for image upload
-			const imageUrlResponse = await fetch('/api/s3-presigned-url', {
-				method: 'POST',
-				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify({
-					key: imageKey,
-					contentType: imageFile.type
-				})
-			});
-			const { url: imagePresignedUrl } = await imageUrlResponse.json();
-
-			// Upload image using pre-signed URL
-			await fetch(imagePresignedUrl, {
-				method: 'PUT',
-				body: imageFile,
-				headers: {
-					'Content-Type': imageFile.type
-				}
-			});
-
-			// Step 2: Get pre-signed URL for metadata upload
-			const metadata = {
-				post_id: postId,
-				owner: username,
-				image_path: imageKey,
-				caption: caption,
-				timestamp: new Date().toISOString(),
-				likes: {
-					count: 0,
-					users: []
-				},
-				comments: []
-			};
-
-			const metadataUrlResponse = await fetch('/api/s3-presigned-url', {
-				method: 'POST',
-				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify({
-					key: metadataKey,
-					contentType: 'application/json'
-				})
-			});
-			const { url: metadataPresignedUrl } = await metadataUrlResponse.json();
-
-			// Upload metadata using pre-signed URL
-			await fetch(metadataPresignedUrl, {
-				method: 'PUT',
-				body: JSON.stringify(metadata),
-				headers: {
-					'Content-Type': 'application/json'
-				}
-			});
-
-			// Step 3: Call the Lambda for analysis
-			const response = await fetch('/create/details', {
-				method: 'POST',
-				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify({
-					bucket: BUCKET,
-					key: imageKey
-				})
-			});
-
-			const analysisData = await response.json();
-
-			if (!response.ok) throw new Error('Image analysis failed');
-
-			 // Quickly complete the progress bar
-			rapidlyCompleteProgress();
-
-			// Set the analysis result
-			if (analysisData.confidence >= 0.8) {
-				analysisResult.set(`Frog detected! Confidence: ${analysisData.confidence}`);
-			} else {
-				analysisResult.set(`Not confident this is a frog. Confidence: ${analysisData.confidence}`);
-			}
-
-			// After analysis is complete:
-			redirectCountdown.set(5);
-			redirectInterval = setInterval(() => {
-				redirectCountdown.update(count => {
-					if (count === 1) {
-						clearInterval(redirectInterval);
-						goto('/'); // Redirect to homepage
-						return 0;
-					}
-					return count !== null ? count - 1 : null;
+				// Upload image first
+				const imageUrlResponse = await fetch('/api/s3-presigned-url', {
+					method: 'POST',
+					headers: { 'Content-Type': 'application/json' },
+					body: JSON.stringify({
+						key: imageKey,
+						contentType: imageFile.type
+					})
 				});
-			}, 1000);
+				const { url: imagePresignedUrl } = await imageUrlResponse.json();
+
+				await fetch(imagePresignedUrl, {
+					method: 'PUT',
+					body: imageFile,
+					headers: {
+						'Content-Type': imageFile.type
+					}
+				});
+
+				// Analyze image
+				const response = await fetch('/create/details', {
+					method: 'POST',
+					headers: { 'Content-Type': 'application/json' },
+					body: JSON.stringify({
+						bucket: BUCKET,
+						key: imageKey
+					})
+				});
+
+				const analysisData = await response.json();
+				if (!response.ok) throw new Error('Image analysis failed');
+
+				rapidlyCompleteProgress();
+
+				// Set analysis result
+				const confidence = analysisData.confidence;
+				analysisResult.set(`Confidence: ${confidence}`);
+
+				if (confidence >= 0.8) {
+					// Create post metadata only if it's a frog
+					const metadata = {
+						post_id: postId,
+						owner: username,
+						image_path: imageKey,
+						caption: caption,
+						timestamp: new Date().toISOString(),
+						likes: { count: 0, users: [] },
+						comments: []
+					};
+
+					const metadataUrlResponse = await fetch('/api/s3-presigned-url', {
+						method: 'POST',
+						headers: { 'Content-Type': 'application/json' },
+						body: JSON.stringify({
+							key: metadataKey,
+							contentType: 'application/json'
+						})
+					});
+					const { url: metadataPresignedUrl } = await metadataUrlResponse.json();
+
+					await fetch(metadataPresignedUrl, {
+						method: 'PUT',
+						body: JSON.stringify(metadata),
+						headers: {
+							'Content-Type': 'application/json'
+						}
+					});
+				} else {
+					// Delete uploaded image if not a frog
+					await fetch('/api/s3-delete', {
+						method: 'POST',
+						headers: { 'Content-Type': 'application/json' },
+						body: JSON.stringify({ key: imageKey })
+					});
+				}
+
+				// Start redirect countdown
+				redirectCountdown.set(5);
+				redirectInterval = setInterval(() => {
+					redirectCountdown.update(count => {
+						if (count === 1) {
+							clearInterval(redirectInterval);
+							goto('/');
+							return 0;
+						}
+						return count !== null ? count - 1 : null;
+					});
+				}, 1000);
 
 		} catch (error) {
 			console.error(error);
 			analysisResult.set('Error processing image');
+			
+			// Cleanup on error
+			try {
+				await fetch('/api/s3-delete', {
+					method: 'POST',
+					headers: { 'Content-Type': 'application/json' },
+					body: JSON.stringify({ key: imageKey })
+				});
+			} catch (cleanupError) {
+				console.error('Failed to cleanup:', cleanupError);
+			}
 		} finally {
 			clearInterval(progressInterval);
 			loading.set(false);
@@ -289,16 +289,16 @@
 								</div>
 							{:else}
 								<div class="flex flex-col items-center space-y-4">
-									<span class="text-6xl">🤔</span>
+									<span class="text-6xl">❌</span>
 									<div class="flex flex-col items-center space-y-2">
-										<p class="text-2xl font-medium text-yellow-400">Not a Frog</p>
+										<p class="text-2xl font-medium text-red-500">Not a Frog!</p>
 										<p class="text-lg text-gray-400">
 											{100 - Math.round(parseFloat($analysisResult.split(': ')[1]) * 100)}% Sure It's Something Else
 										</p>
 									</div>
 									<div class="text-center space-y-2">
-										<p class="text-sm text-gray-400">Our frog detector is ribbiting with disappointment!</p>
-										<p class="text-sm text-gray-500">Frogstagram is for frogs only - nothing else allowed 🐸</p>
+										<p class="text-sm text-red-400 font-medium">Our frog detector has rejected your image!</p>
+										<p class="text-sm text-gray-500">⚠️ Frogstagram is strictly for frogs - no exceptions! 🐸</p>
 									</div>
 									{#if $redirectCountdown}
 										<p class="text-sm text-gray-400">Redirecting in {$redirectCountdown}...</p>
