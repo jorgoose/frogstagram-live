@@ -37,8 +37,10 @@
 				return;
 			}
 
-			// Store password temporarily for verification page
+			// Store credentials temporarily
+			sessionStorage.setItem('tempAuthEmail', email);
 			sessionStorage.setItem('tempAuthPassword', password);
+			
 			goto(`/auth/verify?username=${encodeURIComponent(username)}`);
 		} catch (err: any) {
 			error = err.message || 'An error occurred during sign up';

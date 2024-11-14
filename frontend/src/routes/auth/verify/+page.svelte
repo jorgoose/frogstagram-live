@@ -39,21 +39,22 @@
         // Auto sign in after verification
         const signInResult = await signIn('credentials', {
           redirect: false,
-          username,
-          password: tempPassword,
-          callbackUrl: '/'
-        }) as { error?: string };
-
+          email: sessionStorage.getItem('tempAuthEmail'),
+          password: sessionStorage.getItem('tempAuthPassword')
+        });
+  
         if (signInResult?.error) {
           error = signInResult.error;
           return;
         }
   
-        // Clear temporary password
+        // Clear temporary credentials
+        sessionStorage.removeItem('tempAuthEmail');
         sessionStorage.removeItem('tempAuthPassword');
         
         // Redirect to home page
         goto('/');
+  
       } catch (err: any) {
         error = err.message || 'Verification failed';
       }
