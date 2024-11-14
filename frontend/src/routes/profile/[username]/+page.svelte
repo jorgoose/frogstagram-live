@@ -22,7 +22,7 @@
 	import Fa from 'svelte-fa';
 	import { writable } from 'svelte/store';
 	import { onMount } from 'svelte';
-    import { signOut } from '@auth/sveltekit/client';
+	import { signOut } from '@auth/sveltekit/client';
 
 	const isMoreMenuOpen = writable(false);
 	const isMobileMenuOpen = writable(false);
@@ -108,9 +108,10 @@
 
 	onMount(() => {
 		fetchUserPosts();
+		checkFollowStatus();
 	});
 
-    // Logout handler
+	// Logout handler
 	const handleLogout = async () => {
 		await signOut({ callbackUrl: '/auth/login' });
 	};
@@ -134,11 +135,63 @@
 
 	// Follow state (to be replaced with real data later)
 	let isFollowing = false;
-	
+
+	// Update handleFollowToggle
 	const handleFollowToggle = async () => {
-		isFollowing = !isFollowing;
-		// TODO: Implement actual follow/unfollow API call
+		if (!sessionUsername || !routeUsername || isToggling) return;
+
+		isToggling = true;
+		try {
+			const response = await fetch('/api/follow', {
+				method: isFollowing ? 'DELETE' : 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({
+					follower: sessionUsername,
+					following: routeUsername
+				})
+			});
+
+			if (response.ok) {
+				isFollowing = !isFollowing;
+				// Update follow stats
+				followStats.followers += isFollowing ? 1 : -1;
+			}
+		} catch (error) {
+			console.error('Error toggling follow:', error);
+		} finally {
+			isToggling = false;
+		}
 	};
+
+	// Add new state variables
+	let isCheckingFollow = true;
+	let isToggling = false;
+
+	// Add function to check follow status
+	async function checkFollowStatus() {
+		if (!sessionUsername || !routeUsername) return;
+
+		try {
+			const response = await fetch(`/api/follow?username=${sessionUsername}&profile=${routeUsername}`);
+			const data = await response.json();
+			isFollowing = data.following.includes(routeUsername);
+			
+			// Update follow stats with real data
+			followStats = {
+				followers: data.stats.followers,
+				following: data.stats.following
+			};
+		} catch (error) {
+			console.error('Error checking follow status:', error);
+		} finally {
+			isCheckingFollow = false;
+		}
+	}
+
+	// Update onMount
+	onMount(async () => {
+		await Promise.all([fetchUserPosts(), checkFollowStatus()]);
+	});
 </script>
 
 <div class="flex h-screen bg-white dark:bg-gray-900">
@@ -248,10 +301,12 @@
 	</nav>
 
 	<!-- Mobile Top Bar -->
-	<div class="fixed left-0 right-0 top-0 z-10 flex h-16 items-center justify-between border-b border-gray-200 bg-white px-4 md:hidden dark:border-gray-800 dark:bg-gray-900">
+	<div
+		class="fixed left-0 right-0 top-0 z-10 flex h-16 items-center justify-between border-b border-gray-200 bg-white px-4 md:hidden dark:border-gray-800 dark:bg-gray-900"
+	>
 		<h1 class="text-xl font-bold text-gray-900 dark:text-white">{routeUsername}</h1>
 		<div class="flex items-center space-x-4">
-			<button 
+			<button
 				class="rounded-md p-2 text-gray-700 hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-800"
 			>
 				<Fa icon={faBookmark} class="h-6 w-6" />
@@ -265,7 +320,9 @@
 				</button>
 
 				{#if $isMobileMenuOpen}
-					<div class="absolute right-0 top-12 w-48 rounded-md border border-gray-200 bg-white shadow-lg dark:border-gray-700 dark:bg-gray-800">
+					<div
+						class="absolute right-0 top-12 w-48 rounded-md border border-gray-200 bg-white shadow-lg dark:border-gray-700 dark:bg-gray-800"
+					>
 						<div class="py-1">
 							<button
 								class="flex w-full items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-700"
@@ -324,11 +381,15 @@
 									<div class="text-sm text-gray-500">posts</div>
 								</div>
 								<div>
-									<div class="font-semibold text-gray-900 dark:text-white">{followStats.followers}</div>
+									<div class="font-semibold text-gray-900 dark:text-white">
+										{followStats.followers}
+									</div>
 									<div class="text-sm text-gray-500">followers</div>
 								</div>
 								<div>
-									<div class="font-semibold text-gray-900 dark:text-white">{followStats.following}</div>
+									<div class="font-semibold text-gray-900 dark:text-white">
+										{followStats.following}
+									</div>
 									<div class="text-sm text-gray-500">following</div>
 								</div>
 							</div>
@@ -350,10 +411,23 @@
 						</button>
 					{:else}
 						<button
-							class="w-full rounded-md {isFollowing ? 'bg-gray-100 dark:bg-gray-800' : 'bg-green-600 dark:bg-green-500'} px-4 py-1.5 text-sm font-semibold {isFollowing ? 'text-gray-900 dark:text-white' : 'text-white'} transition-colors {isFollowing ? 'hover:bg-gray-200 dark:hover:bg-gray-700' : 'hover:bg-green-700 dark:hover:bg-green-600'}"
+							class="w-full rounded-md {isFollowing
+								? 'bg-gray-100 dark:bg-gray-800'
+								: 'bg-green-600 dark:bg-green-500'} px-4 py-1.5 text-sm font-semibold {isFollowing
+								? 'text-gray-900 dark:text-white'
+								: 'text-white'} transition-colors {isFollowing
+								? 'hover:bg-gray-200 dark:hover:bg-gray-700'
+								: 'hover:bg-green-700 dark:hover:bg-green-600'}"
 							on:click={handleFollowToggle}
+							disabled={isToggling || isCheckingFollow}
 						>
-							{isFollowing ? 'Following' : 'Follow'}
+							{#if isCheckingFollow}
+								<span class="animate-pulse">Loading...</span>
+							{:else if isToggling}
+								<span class="animate-pulse">{isFollowing ? 'Unfollowing...' : 'Following...'}</span>
+							{:else}
+								{isFollowing ? 'Following' : 'Follow'}
+							{/if}
 						</button>
 					{/if}
 				</div>
