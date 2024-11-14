@@ -156,45 +156,6 @@
 			goto(`/profile/${user.username}`);
 		}
 	};
-
-	let mockPosts = [
-		{
-			id: 1,
-			user: {
-				name: 'froglover123',
-				avatar: 'https://picsum.photos/seed/user1/40/40'
-			},
-			image: 'https://picsum.photos/seed/frog1/600/600',
-			ribbits: 256,
-			ribbited: true,
-			caption: "Just chillin' on a lily pad 🐸",
-			comments: 42
-		},
-		{
-			id: 2,
-			user: {
-				name: 'toadtalker',
-				avatar: 'https://picsum.photos/seed/user2/40/40'
-			},
-			image: 'https://picsum.photos/seed/frog2/600/600',
-			ribbits: 189,
-			ribbited: false,
-			caption: 'Hopped into a new adventure today! 🌿',
-			comments: 23
-		},
-		{
-			id: 3,
-			user: {
-				name: 'ribbitranger',
-				avatar: 'https://picsum.photos/seed/user3/40/40'
-			},
-			image: 'https://picsum.photos/seed/frog3/600/600',
-			ribbits: 312,
-			ribbited: false,
-			caption: 'Caught a fly mid-air! #NinjaFrog',
-			comments: 56
-		}
-	];
 </script>
 
 <div class="flex h-screen bg-white dark:bg-gray-900" on:scroll={handleScroll}>

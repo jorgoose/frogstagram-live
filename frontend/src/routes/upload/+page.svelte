@@ -16,6 +16,9 @@
 	import Fa from 'svelte-fa';
 	import { writable } from 'svelte/store';
 
+	import { page } from '$app/stores';
+	$: user = $page.data.session?.user;
+
 	const isMoreMenuOpen = writable(false);
 
 	function toggleMoreMenu() {
