@@ -10,7 +10,7 @@
 	let imageUrl: string | null = null;
 	let caption: string = '';
 	let loading = writable(false);
-	let analysisResult = writable<string | null>(null);
+	let analysisResult = writable<string | FrogAnalysis | null>(null);
 	let uploadProgress = writable(0);
 	let progressInterval: NodeJS.Timeout;
 	let redirectCountdown = writable<number | null>(null);
@@ -21,7 +21,17 @@
 	// / Get user from page session
 	type User = { username: string };
 	$: username = ($page.data.session?.user as User)?.username;
-	
+
+	// Add interface at top of script
+	interface FrogAnalysis {
+		is_frog: boolean;
+		confidence: number;
+		details: {
+			tree_frog: number;
+			bullfrog: number;
+			tailed_frog: number;
+		};
+	}
 
 	onMount(() => {
 		const unsubscribe = croppedImage.subscribe((file) => {
@@ -58,10 +68,16 @@
 		}, 10); // Run every 10ms
 	}
 
-	// Add helper function for parsing confidence
-	function getFrogConfidence(result: string): number {
-		const confidence = parseFloat(result.split(': ')[1]);
-		return isNaN(confidence) ? 0.01 : confidence; // Default to 1% frog confidence if NaN
+	// Update getFrogConfidence function
+	function getFrogConfidence(result: FrogAnalysis | string | null): number {
+		if (!result) return 0.01;
+		
+		if (typeof result === 'string') {
+			const confidence = parseFloat(result.split(': ')[1]);
+			return isNaN(confidence) ? 0.01 : confidence;
+		}
+		
+		return result.confidence;
 	}
 
 	async function handleShare() {
@@ -105,16 +121,15 @@
 					})
 				});
 
-				const analysisData = await response.json();
-				if (!response.ok) throw new Error('Image analysis failed');
+				const analysisData: FrogAnalysis = await response.json();
+				console.log('Analysis result:', analysisData);
 
 				rapidlyCompleteProgress();
 
-				// Set analysis result
-				const confidence = getFrogConfidence(analysisData.confidence);
-				analysisResult.set(`Confidence: ${confidence}`);
+				// Set analysis result directly
+				analysisResult.set(analysisData);
 
-				if (confidence >= 0.8) {
+				if (analysisData.confidence >= 0.8) {
 					// Create post metadata only if it's a frog
 					const metadata = {
 						post_id: postId,
@@ -280,13 +295,13 @@
 						</div>
 					{:else if $analysisResult}
 						<div class="flex flex-col items-center space-y-6">
-							{#if getFrogConfidence($analysisResult) >= 0.8}
+							{#if ($analysisResult as FrogAnalysis).confidence >= 0.8}
 								<div class="flex flex-col items-center space-y-4">
 									<span class="text-6xl">🐸</span>
 									<div class="flex flex-col items-center space-y-2">
 										<p class="text-2xl font-medium text-green-400">Frog Detected!</p>
 										<p class="text-lg text-gray-400">
-											{Math.round(getFrogConfidence($analysisResult) * 100)}% Confidence
+											{Math.round(($analysisResult as FrogAnalysis).confidence * 100)}% Confidence
 										</p>
 										{#if $redirectCountdown}
 											<p class="text-sm text-gray-400">Redirecting in {$redirectCountdown}...</p>
@@ -295,11 +310,11 @@
 								</div>
 							{:else}
 								<div class="flex flex-col items-center space-y-4">
-									<span class="text-6xl">❌</span>
+									<span class="text-6xl">🚫</span>
 									<div class="flex flex-col items-center space-y-2">
 										<p class="text-2xl font-medium text-red-500">Not a Frog!</p>
 										<p class="text-lg text-gray-400">
-											{100 - Math.round(getFrogConfidence($analysisResult) * 100)}% Sure It's Something Else
+											{100 - Math.round(($analysisResult as FrogAnalysis).confidence * 100)}% Sure It's Something Else
 										</p>
 									</div>
 									<div class="text-center space-y-2">
