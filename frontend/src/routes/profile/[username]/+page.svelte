@@ -37,8 +37,6 @@
 
 	// Define User type
 	type User = {
-		profileImage: string;
-		displayName: string;
 		bio: string;
 	};
 
@@ -72,8 +70,6 @@
 
 	let user: User = {
 		// Lorem picsum image
-		profileImage: 'https://picsum.photos/seed/user1/200/200',
-		displayName: '',
 		bio: ''
 	};
 	let posts: Post[] = [];
@@ -280,7 +276,7 @@
 				class="flex w-full items-center px-4 py-3 text-gray-700 hover:bg-green-50 dark:text-gray-200 dark:hover:bg-green-900/20"
 			>
 				<img
-					src="https://picsum.photos/seed/user1/40/40"
+					src="https://picsum.photos/seed/{routeUsername}/40/40"
 					alt="Your profile"
 					class="mr-3 h-8 w-8 rounded-full"
 				/>
@@ -352,7 +348,7 @@
 		</button>
 		<button class="flex flex-col items-center p-2 text-gray-700 dark:text-gray-200">
 			<img
-				src="https://picsum.photos/seed/user1/40/40"
+				src="https://picsum.photos/seed/{routeUsername}/40/40"
 				alt="Your profile"
 				class="h-6 w-6 rounded-full"
 			/>
@@ -369,7 +365,7 @@
 					<!-- Profile Header -->
 					<div class="mb-4 flex items-start">
 						<img
-							src={user.profileImage}
+							src="https://picsum.photos/seed/{routeUsername}/200/200"
 							alt={routeUsername}
 							class="h-20 w-20 rounded-full object-cover"
 						/>
