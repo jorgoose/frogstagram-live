@@ -286,7 +286,7 @@
 				class="flex w-full items-center px-4 py-3 text-gray-700 hover:bg-green-50 dark:text-gray-200 dark:hover:bg-green-900/20"
 			>
 				<img
-					src={user?.image || 'https://picsum.photos/seed/user1/40/40'}
+					src={user?.image || `https://picsum.photos/seed/${user?.username || 'user1'}/40/40`}
 					alt="Your profile"
 					class="mr-3 h-8 w-8 rounded-full"
 				/>
