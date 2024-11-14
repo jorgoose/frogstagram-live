@@ -58,6 +58,12 @@
 		}, 10); // Run every 10ms
 	}
 
+	// Add helper function for parsing confidence
+	function getFrogConfidence(result: string): number {
+		const confidence = parseFloat(result.split(': ')[1]);
+		return isNaN(confidence) ? 0.01 : confidence; // Default to 1% frog confidence if NaN
+	}
+
 	async function handleShare() {
 		if (!imageFile || $loading) return;
 
@@ -105,7 +111,7 @@
 				rapidlyCompleteProgress();
 
 				// Set analysis result
-				const confidence = analysisData.confidence;
+				const confidence = getFrogConfidence(analysisData.confidence);
 				analysisResult.set(`Confidence: ${confidence}`);
 
 				if (confidence >= 0.8) {
@@ -274,13 +280,13 @@
 						</div>
 					{:else if $analysisResult}
 						<div class="flex flex-col items-center space-y-6">
-							{#if parseFloat($analysisResult.split(': ')[1]) >= 0.8}
+							{#if getFrogConfidence($analysisResult) >= 0.8}
 								<div class="flex flex-col items-center space-y-4">
 									<span class="text-6xl">🐸</span>
 									<div class="flex flex-col items-center space-y-2">
 										<p class="text-2xl font-medium text-green-400">Frog Detected!</p>
 										<p class="text-lg text-gray-400">
-											{Math.round(parseFloat($analysisResult.split(': ')[1]) * 100)}% Confidence
+											{Math.round(getFrogConfidence($analysisResult) * 100)}% Confidence
 										</p>
 										{#if $redirectCountdown}
 											<p class="text-sm text-gray-400">Redirecting in {$redirectCountdown}...</p>
@@ -293,7 +299,7 @@
 									<div class="flex flex-col items-center space-y-2">
 										<p class="text-2xl font-medium text-red-500">Not a Frog!</p>
 										<p class="text-lg text-gray-400">
-											{100 - Math.round(parseFloat($analysisResult.split(': ')[1]) * 100)}% Sure It's Something Else
+											{100 - Math.round(getFrogConfidence($analysisResult) * 100)}% Sure It's Something Else
 										</p>
 									</div>
 									<div class="text-center space-y-2">
