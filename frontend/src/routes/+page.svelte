@@ -23,6 +23,25 @@
 	import { signOut } from '@auth/sveltekit/client';
 	import { onMount } from 'svelte';
 
+	// Add proper types at the top of script
+	interface User {
+		id: string;
+		username: string;
+		email: string;
+		image?: string;
+	}
+
+	interface Comment {
+		id: string;
+		owner: string;
+		text: string;
+		timestamp: string;
+		likes: {
+			count: number;
+			users: string[];
+		};
+	}
+
 	interface Post {
 		post_id: string;
 		owner: string;
@@ -33,23 +52,16 @@
 			count: number;
 			users: string[];
 		};
-		comments: Array<{
-			id: string;
-			owner: string;
-			text: string;
-			timestamp: string;
-			likes: {
-				count: number;
-				users: string[];
-			};
-		}>;
+		comments: Comment[];
 	}
 
+	// Add type to posts array
 	let posts: Post[] = [];
-	let isLoading = true;
-	let hasMore = true;
-	let loadingMore = false;
-	let commentText = '';
+	let isLoading: boolean = true;
+	let hasMore: boolean = true;
+	let loadingMore: boolean = false;
+	// Add type for comment state
+	let commentText: string = '';
 	let showComments: Record<string, boolean> = {};
 
 	async function fetchPosts(cursor?: string) {
@@ -87,7 +99,8 @@
 		fetchPosts();
 	});
 
-	async function toggleRibbited(post: Post) {
+	// Update handlers with type safety
+	async function toggleRibbited(post: Post): Promise<void> {
 		if (!user?.username) return; // Early return if no user
 		
 		const hasLiked = post.likes.users.includes(user.username);
@@ -138,7 +151,8 @@
 		}
 	}
 
-	async function handleComment(post: Post) {
+	// Update handlers with type safety
+	async function handleComment(post: Post): Promise<void> {
 		if (!user?.username || !commentText.trim()) return;
 		
 		try {
@@ -153,7 +167,7 @@
 
 			if (!response.ok) throw new Error('Failed to add comment');
 			
-			const { comment } = await response.json();
+			const { comment } = await response.json() as { comment: Comment };
 			
 			// Update local state
 			posts = posts.map(p => {
@@ -172,7 +186,8 @@
 		}
 	}
 
-	function toggleComments(postId: string) {
+	// Add return type to handlers
+	function toggleComments(postId: string): void {
 		showComments = {
 			...showComments,
 			[postId]: !showComments[postId]
@@ -181,7 +196,8 @@
 
 	const isMoreMenuOpen = writable(false);
 
-	function toggleMoreMenu() {
+	// Add return type to handlers
+	function toggleMoreMenu(): void {
 		isMoreMenuOpen.update((value) => !value);
 	}
 
@@ -191,10 +207,10 @@
 	};
 
 	// Get user from session
-	$: user = $page.data.session?.user;
+	$: user = ($page.data.session?.user as User | undefined);
 
-	// Handle profile click
-	const goToProfile = () => {
+	// Update profile navigation
+	const goToProfile = (): void => {
 		if (user?.username) {
 			goto(`/profile/${user.username}`);
 		}
@@ -449,6 +465,7 @@
 									</div>
 								{/if}
 								
+								<!-- Update the comment form section -->
 								<div class="mt-2 w-full">
 									<form 
 										class="flex items-center space-x-2"
@@ -457,15 +474,16 @@
 										<input
 											bind:value={commentText}
 											placeholder="Add a comment..."
-											class="flex-1 rounded-md border border-gray-200 bg-white px-3 py-2 text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-green-600 dark:border-gray-700 dark:bg-gray-800 dark:text-white dark:placeholder-gray-400 dark:focus:ring-green-500"
+											class="flex-1 rounded-md border-none bg-transparent text-sm text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-0 dark:text-white dark:placeholder-gray-400"
 										/>
-										<button
-											type="submit"
-											class="rounded-md bg-green-600 px-4 py-2 text-sm font-medium text-white hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-600 focus:ring-offset-2 dark:bg-green-500 dark:hover:bg-green-600"
-											disabled={!commentText.trim()}
-										>
-											Post
-										</button>
+										{#if commentText.trim()}
+											<button
+												type="submit"
+												class="text-sm font-medium text-green-600 hover:text-green-700 dark:text-green-400 dark:hover:text-green-300"
+											>
+												Post
+											</button>
+										{/if}
 									</form>
 								</div>
 						</div>
