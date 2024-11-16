@@ -3,7 +3,6 @@ import { S3Client, GetObjectCommand, PutObjectCommand } from '@aws-sdk/client-s3
 import type { RequestHandler } from './$types';
 import { AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY } from '$env/static/private';
 import { error, json } from '@sveltejs/kit';
-import { page } from '$app/stores';
 
 const BUCKET = 'frogstagram-posts';
 const REGION = 'us-east-1';
@@ -16,7 +15,27 @@ const s3Client = new S3Client({
     }
 });
 
-async function getPostMetadata(postId: string) {
+interface Comment {
+    id: string;
+    owner: string;
+    text: string;
+    timestamp: string;
+    likes: {
+        count: number;
+        users: string[];
+    };
+}
+
+interface PostMetadata {
+    comments: Comment[];
+    likes: {
+        count: number;
+        users: string[];
+    };
+    // Add other fields as necessary
+}
+
+async function getPostMetadata(postId: string): Promise<PostMetadata> {
     const command = new GetObjectCommand({
         Bucket: BUCKET,
         Key: `metadata/${postId}/post.json`
@@ -24,10 +43,10 @@ async function getPostMetadata(postId: string) {
 
     const response = await s3Client.send(command);
     const metadata = await response.Body?.transformToString();
-    return JSON.parse(metadata || '{}');
+    return JSON.parse(metadata || '{}') as PostMetadata;
 }
 
-async function updatePostMetadata(postId: string, metadata: any) {
+async function updatePostMetadata(postId: string, metadata: PostMetadata) {
     const command = new PutObjectCommand({
         Bucket: BUCKET,
         Key: `metadata/${postId}/post.json`,
