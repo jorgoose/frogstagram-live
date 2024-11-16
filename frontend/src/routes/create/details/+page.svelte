@@ -55,10 +55,10 @@
 	function rapidlyCompleteProgress() {
 		// Clear existing interval
 		clearInterval(progressInterval);
-		
+
 		// Create new interval that moves much faster
 		progressInterval = setInterval(() => {
-			uploadProgress.update(p => {
+			uploadProgress.update((p) => {
 				if (p >= 100) {
 					clearInterval(progressInterval);
 					return 100;
@@ -71,12 +71,12 @@
 	// Update getFrogConfidence function
 	function getFrogConfidence(result: FrogAnalysis | string | null): number {
 		if (!result) return 0.01;
-		
+
 		if (typeof result === 'string') {
 			const confidence = parseFloat(result.split(': ')[1]);
 			return isNaN(confidence) ? 0.01 : confidence;
 		}
-		
+
 		return result.confidence;
 	}
 
@@ -92,98 +92,97 @@
 		const metadataKey = `metadata/${postId}/post.json`;
 
 		try {
-				// Upload image first
-				const imageUrlResponse = await fetch('/api/s3-presigned-url', {
+			// Upload image first
+			const imageUrlResponse = await fetch('/api/s3-presigned-url', {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({
+					key: imageKey,
+					contentType: imageFile.type
+				})
+			});
+			const { url: imagePresignedUrl } = await imageUrlResponse.json();
+
+			await fetch(imagePresignedUrl, {
+				method: 'PUT',
+				body: imageFile,
+				headers: {
+					'Content-Type': imageFile.type
+				}
+			});
+
+			// Analyze image
+			const response = await fetch('/create/details', {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({
+					bucket: BUCKET,
+					key: imageKey
+				})
+			});
+
+			const analysisData: FrogAnalysis = await response.json();
+			console.log('Analysis result:', analysisData);
+
+			rapidlyCompleteProgress();
+
+			// Set analysis result directly
+			analysisResult.set(analysisData);
+
+			if (analysisData.confidence >= 0.8) {
+				// Create post metadata only if it's a frog
+				const metadata = {
+					post_id: postId,
+					owner: username,
+					image_path: imageKey,
+					caption: caption,
+					timestamp: new Date().toISOString(),
+					likes: { count: 0, users: [] },
+					comments: []
+				};
+
+				const metadataUrlResponse = await fetch('/api/s3-presigned-url', {
 					method: 'POST',
 					headers: { 'Content-Type': 'application/json' },
 					body: JSON.stringify({
-						key: imageKey,
-						contentType: imageFile.type
+						key: metadataKey,
+						contentType: 'application/json'
 					})
 				});
-				const { url: imagePresignedUrl } = await imageUrlResponse.json();
+				const { url: metadataPresignedUrl } = await metadataUrlResponse.json();
 
-				await fetch(imagePresignedUrl, {
+				await fetch(metadataPresignedUrl, {
 					method: 'PUT',
-					body: imageFile,
+					body: JSON.stringify(metadata),
 					headers: {
-						'Content-Type': imageFile.type
+						'Content-Type': 'application/json'
 					}
 				});
-
-				// Analyze image
-				const response = await fetch('/create/details', {
+			} else {
+				// Delete uploaded image if not a frog
+				await fetch('/api/s3-delete', {
 					method: 'POST',
 					headers: { 'Content-Type': 'application/json' },
-					body: JSON.stringify({
-						bucket: BUCKET,
-						key: imageKey
-					})
+					body: JSON.stringify({ key: imageKey })
 				});
+			}
 
-				const analysisData: FrogAnalysis = await response.json();
-				console.log('Analysis result:', analysisData);
-
-				rapidlyCompleteProgress();
-
-				// Set analysis result directly
-				analysisResult.set(analysisData);
-
-				if (analysisData.confidence >= 0.8) {
-					// Create post metadata only if it's a frog
-					const metadata = {
-						post_id: postId,
-						owner: username,
-						image_path: imageKey,
-						caption: caption,
-						timestamp: new Date().toISOString(),
-						likes: { count: 0, users: [] },
-						comments: []
-					};
-
-					const metadataUrlResponse = await fetch('/api/s3-presigned-url', {
-						method: 'POST',
-						headers: { 'Content-Type': 'application/json' },
-						body: JSON.stringify({
-							key: metadataKey,
-							contentType: 'application/json'
-						})
-					});
-					const { url: metadataPresignedUrl } = await metadataUrlResponse.json();
-
-					await fetch(metadataPresignedUrl, {
-						method: 'PUT',
-						body: JSON.stringify(metadata),
-						headers: {
-							'Content-Type': 'application/json'
-						}
-					});
-				} else {
-					// Delete uploaded image if not a frog
-					await fetch('/api/s3-delete', {
-						method: 'POST',
-						headers: { 'Content-Type': 'application/json' },
-						body: JSON.stringify({ key: imageKey })
-					});
-				}
-
-				// Start redirect countdown
-				redirectCountdown.set(5);
-				redirectInterval = setInterval(() => {
-					redirectCountdown.update(count => {
-						if (count === 1) {
-							clearInterval(redirectInterval);
-							goto('/');
-							return 0;
-						}
-						return count !== null ? count - 1 : null;
-					});
-				}, 1000);
-
+			// Start redirect countdown
+			redirectCountdown.set(5);
+			redirectInterval = setInterval(() => {
+				redirectCountdown.update((count) => {
+					if (count === 1) {
+						clearInterval(redirectInterval);
+						goto('/');
+						return 0;
+					}
+					return count !== null ? count - 1 : null;
+				});
+			}, 1000);
 		} catch (error) {
 			console.error(error);
 			analysisResult.set('Error processing image');
-			
+
 			// Cleanup on error
 			try {
 				await fetch('/api/s3-delete', {
@@ -238,7 +237,7 @@
 				<div class="border-b border-gray-800 p-4">
 					<div class="flex items-start gap-3">
 						<img
-							src="https://picsum.photos/seed/user1/40/40"
+							src="https://picsum.photos/seed/{username}/64"
 							alt="Profile"
 							class="h-8 w-8 flex-shrink-0 rounded-full"
 						/>
@@ -314,12 +313,17 @@
 									<div class="flex flex-col items-center space-y-2">
 										<p class="text-2xl font-medium text-red-500">Not a Frog!</p>
 										<p class="text-lg text-gray-400">
-											{100 - Math.round(($analysisResult as FrogAnalysis).confidence * 100)}% Sure It's Something Else
+											{100 - Math.round(($analysisResult as FrogAnalysis).confidence * 100)}% Sure
+											It's Something Else
 										</p>
 									</div>
-									<div class="text-center space-y-2">
-										<p class="text-sm text-red-400 font-medium">Our frog detector has rejected your image!</p>
-										<p class="text-sm text-gray-500">⚠️ Frogstagram is strictly for frogs - no exceptions! 🐸</p>
+									<div class="space-y-2 text-center">
+										<p class="text-sm font-medium text-red-400">
+											Our frog detector has rejected your image!
+										</p>
+										<p class="text-sm text-gray-500">
+											⚠️ Frogstagram is strictly for frogs - no exceptions! 🐸
+										</p>
 									</div>
 									{#if $redirectCountdown}
 										<p class="text-sm text-gray-400">Redirecting in {$redirectCountdown}...</p>
