@@ -49,6 +49,8 @@
 	let isLoading = true;
 	let hasMore = true;
 	let loadingMore = false;
+	let commentText = '';
+	let showComments: Record<string, boolean> = {};
 
 	async function fetchPosts(cursor?: string) {
 		try {
@@ -134,6 +136,47 @@
 				return p;
 			});
 		}
+	}
+
+	async function handleComment(post: Post) {
+		if (!user?.username || !commentText.trim()) return;
+		
+		try {
+			const response = await fetch(`/api/posts/${post.post_id}/comment`, {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({
+					username: user.username,
+					text: commentText.trim()
+				})
+			});
+
+			if (!response.ok) throw new Error('Failed to add comment');
+			
+			const { comment } = await response.json();
+			
+			// Update local state
+			posts = posts.map(p => {
+				if (p.post_id === post.post_id) {
+					return {
+						...p,
+						comments: [...p.comments, comment]
+					};
+				}
+				return p;
+			});
+			
+			commentText = '';
+		} catch (error) {
+			console.error('Error:', error);
+		}
+	}
+
+	function toggleComments(postId: string) {
+		showComments = {
+			...showComments,
+			[postId]: !showComments[postId]
+		};
 	}
 
 	const isMoreMenuOpen = writable(false);
@@ -383,16 +426,48 @@
 								</a>
 								{post.caption}
 							</p>
-							<button class="mt-1 text-sm text-green-700 hover:underline dark:text-green-400">
-								View all {post.comments.length} comments
-							</button>
-							<div class="mt-2 w-full">
-								<input
-									type="text"
-									placeholder="Add a comment..."
-									class="w-full rounded-md border border-gray-200 bg-white px-3 py-2 text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-green-600 dark:border-gray-700 dark:bg-gray-800 dark:text-white dark:placeholder-gray-400 dark:focus:ring-green-500"
-								/>
-							</div>
+								<button 
+									class="mt-1 text-sm text-green-700 hover:underline dark:text-green-400"
+									on:click={() => toggleComments(post.post_id)}
+								>
+									View all {post.comments.length} comments
+								</button>
+								
+								{#if showComments[post.post_id]}
+									<div class="mt-2 space-y-2">
+										{#each post.comments as comment}
+											<div class="text-sm">
+												<a 
+													href={`/profile/${comment.owner}`}
+													class="mr-2 font-semibold text-gray-900 dark:text-white"
+												>
+													{comment.owner}
+												</a>
+												<span class="text-gray-900 dark:text-white">{comment.text}</span>
+											</div>
+										{/each}
+									</div>
+								{/if}
+								
+								<div class="mt-2 w-full">
+									<form 
+										class="flex items-center space-x-2"
+										on:submit|preventDefault={() => handleComment(post)}
+									>
+										<input
+											bind:value={commentText}
+											placeholder="Add a comment..."
+											class="flex-1 rounded-md border border-gray-200 bg-white px-3 py-2 text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-green-600 dark:border-gray-700 dark:bg-gray-800 dark:text-white dark:placeholder-gray-400 dark:focus:ring-green-500"
+										/>
+										<button
+											type="submit"
+											class="rounded-md bg-green-600 px-4 py-2 text-sm font-medium text-white hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-600 focus:ring-offset-2 dark:bg-green-500 dark:hover:bg-green-600"
+											disabled={!commentText.trim()}
+										>
+											Post
+										</button>
+									</form>
+								</div>
 						</div>
 					</div>
 				{/each}
