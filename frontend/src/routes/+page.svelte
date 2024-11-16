@@ -364,7 +364,7 @@
 			class="flex flex-col items-center p-2 text-gray-700 dark:text-gray-200"
 		>
 			<img
-				src={user?.image || 'https://picsum.photos/seed/user1/40/40'}
+				src={user?.image || `https://picsum.photos/seed/${user?.username || 'user1'}/40/40`}
 				alt="Your profile"
 				class="h-6 w-6 rounded-full"
 			/>
