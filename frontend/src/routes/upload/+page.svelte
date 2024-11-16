@@ -127,12 +127,12 @@
 				class="flex w-full items-center px-4 py-3 text-gray-700 hover:bg-green-50 dark:text-gray-200 dark:hover:bg-green-900/20"
 			>
 				<img
-					src="https://picsum.photos/seed/user1/40/40"
+					src="https://picsum.photos/seed/{user?.username}/40/40"
 					alt="Your profile"
 					class="mr-3 h-8 w-8 rounded-full"
 				/>
 				<div class="flex-1 text-left">
-					<div class="text-sm font-medium">YourUsername</div>
+					<div class="text-sm font-medium">{user?.username}</div>
 					<div class="text-xs text-green-700 dark:text-green-400">View Profile</div>
 				</div>
 			</button>
@@ -177,7 +177,7 @@
 		</a>
 		<a href="/profile" class="flex flex-col items-center p-2 text-gray-700 dark:text-gray-200">
 			<img
-				src="https://picsum.photos/seed/user1/40/40"
+				src="https://picsum.photos/seed/{user?.username}/40/40"
 				alt="Your profile"
 				class="h-6 w-6 rounded-full"
 			/>
