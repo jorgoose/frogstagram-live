@@ -38,6 +38,7 @@
 	// Define User type
 	type User = {
 		bio: string;
+		username: string;
 	};
 
 	// Get user from session
@@ -70,7 +71,8 @@
 
 	let user: User = {
 		// Lorem picsum image
-		bio: ''
+		bio: '',
+		username: ''
 	};
 	let posts: Post[] = [];
 	let isLoading = true;
@@ -168,10 +170,12 @@
 		if (!sessionUsername || !routeUsername) return;
 
 		try {
-			const response = await fetch(`/api/follow?username=${sessionUsername}&profile=${routeUsername}`);
+			const response = await fetch(
+				`/api/follow?username=${sessionUsername}&profile=${routeUsername}`
+			);
 			const data = await response.json();
 			isFollowing = data.following.includes(routeUsername);
-			
+
 			// Update follow stats with real data
 			followStats = {
 				followers: data.stats.followers,
