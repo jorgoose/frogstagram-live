@@ -17,7 +17,14 @@
 	import { writable } from 'svelte/store';
 
 	import { page } from '$app/stores';
-	$: user = $page.data.session?.user;
+	$: user = $page.data.session?.user as User | undefined;
+
+	interface User {
+		id: string;
+		username: string;
+		email: string;
+		image?: string;
+	}
 
 	const isMoreMenuOpen = writable(false);
 
@@ -36,6 +43,13 @@
 			goto('/create/edit', { replaceState: false });
 		}
 	}
+
+	// Add goToProfile function
+	const goToProfile = (): void => {
+		if (user?.username) {
+			goto(`/profile/${user.username}`);
+		}
+	};
 </script>
 
 <div class="flex h-screen bg-white dark:bg-gray-900">
@@ -124,6 +138,7 @@
 
 			<!-- Profile Button -->
 			<button
+				on:click={goToProfile}
 				class="flex w-full items-center px-4 py-3 text-gray-700 hover:bg-green-50 dark:text-gray-200 dark:hover:bg-green-900/20"
 			>
 				<img
@@ -175,14 +190,17 @@
 			<Fa icon={faMagnifyingGlass} class="h-6 w-6" />
 			<span class="mt-1 text-xs">Search</span>
 		</a>
-		<a href="/profile" class="flex flex-col items-center p-2 text-gray-700 dark:text-gray-200">
+		<button
+			on:click={goToProfile}
+			class="flex flex-col items-center p-2 text-gray-700 dark:text-gray-200"
+		>
 			<img
 				src="https://picsum.photos/seed/{user?.username}/40/40"
 				alt="Your profile"
 				class="h-6 w-6 rounded-full"
 			/>
 			<span class="mt-1 text-xs">Profile</span>
-		</a>
+		</button>
 	</div>
 
 	<!-- Main Content Area -->
